@@ -5,11 +5,23 @@ import struct
 import bp_setup
 
 def escape(text):
+	text = text.replace('\a', '\\a')
+	text = text.replace('\b', '\\b')
+	text = text.replace('\t', '\\t')
 	text = text.replace('\n', '\\n')
+	text = text.replace('\v', '\\v')
+	text = text.replace('\f', '\\f')
+	text = text.replace('\r', '\\r')
 	return text
 	
 def unescape(text):
+	text = text.replace('\\a', '\a')
+	text = text.replace('\\b', '\b')
+	text = text.replace('\\t', '\t')
 	text = text.replace('\\n', '\n')
+	text = text.replace('\\v', '\v')
+	text = text.replace('\\f', '\f')
+	text = text.replace('\\r', '\r')
 	return text
 
 def get_byte(data, offset):
@@ -73,6 +85,7 @@ def get_code_section(code_bytes, text_section):
 	code_size = len(code_bytes)
 	code_section = {}
 	id = 1
+	texts = {}
 	while 1:
 		res = code_bytes.find(b'\x05', pos+1)
 		if res == -1:
@@ -80,8 +93,10 @@ def get_code_section(code_bytes, text_section):
 		word, = struct.unpack('<H', code_bytes[res+1:res+3])
 		if word+res-code_size in text_section:
 			text = text_section[word+res-code_size]
-			record = text, id
-			code_section[res] = record
-			id += 1
+			if text not in texts:
+				texts[text] = id
+				id += 1
+			record = text, texts[text]
+			code_section[res] = record 
 		pos = res
 	return code_section
