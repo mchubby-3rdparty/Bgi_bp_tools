@@ -56,7 +56,13 @@ def get_text_section(text_bytes):
 	for string in strings:
 		addrs.append(pos)
 		pos += len(string) + 1
-	texts = [x.decode(bp_setup.senc) for x in strings]
+	texts = []
+	for string in strings:
+		try:
+			text = string.decode(bp_setup.senc)
+			texts.append(text)
+		except UnicodeDecodeError:
+			pass
 	text_section = {}
 	for addr,text in zip(addrs,texts):
 		text_section[addr] = text
